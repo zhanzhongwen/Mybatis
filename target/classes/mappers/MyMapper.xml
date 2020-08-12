@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- mapper:根标签，namespace：命名空间，随便写，一般保证命名空间唯一 &ndash;&gt;
+        这里所谓的mapper接口路径。实际上就是dao的接口路径。在mybatis中，通常把dao的包叫做mapper。类名，也叫做mapper
+        1、定义一个接口。
+        2、在接口所在的包中定义mapper.xml，并且要求xml文件和interface的名称要相同。
+        3、在mybatis-config.xml 中通过class路径，引入mapper（注解方式）。要求mapper.xml 中的名称空间是类的接口的全路径。
+       -->
+<mapper namespace="MyMapper">
+    <select id="selectUser" resultType="com.yinhai.mybatis.pojo.User">
+      select * from tb_user where id = #{id}
+   </select>
+</mapper>

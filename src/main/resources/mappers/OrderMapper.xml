@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- mapper:根标签，namespace：命名空间，随便写，一般保证命名空间唯一 &ndash;&gt;
+        这里所谓的mapper接口路径。实际上就是dao的接口路径。在mybatis中，通常把dao的包叫做mapper。类名，也叫做mapper
+        1、定义一个接口。
+        2、在接口所在的包中定义mapper.xml，并且要求xml文件和interface的名称要相同。
+        3、在mybatis-config.xml 中通过class路径，引入mapper（注解方式）。要求mapper.xml 中的名称空间是类的接口的全路径。
+       -->
+<mapper namespace="com.yinhai.mybatis.dao.OrderMapper">
+    <resultMap id="OrderUserResultMap" type="com.yinhai.mybatis.pojo.Order" autoMapping="true">
+        <id column="id" property="id"/>
+        <!--association:完成子对象的映射-->
+        <!--property:子对象在父对象中的属性名-->
+        <!--javaType:子对象的java类型-->
+        <!--autoMapping:完成子对象的自动映射，若开启驼峰，则按驼峰匹配-->
+        <association property="user" javaType="com.yinhai.mybatis.pojo.User" autoMapping="true">
+            <id column="user_id" property="id"/>
+        </association>
+    </resultMap>
+
+    <resultMap id="OrderUserDetailResultMap" type="com.yinhai.mybatis.pojo.Order" autoMapping="true">
+        <id column="id" property="id"/>
+        <!--collection:定义子对象集合映射-->
+        <!--association:完成子对象的映射-->
+        <!--property:子对象在父对象中的属性名-->
+        <!--javaType:子对象的java类型-->
+        <!--autoMapping:完成子对象的自动映射，若开启驼峰，则按驼峰匹配-->
+        <association property="user" javaType="com.yinhai.mybatis.pojo.User" autoMapping="true">
+            <id column="user_id" property="id"/>
+        </association>
+        <collection property="detailList" javaType="List" ofType="com.yinhai.mybatis.pojo.OrderDetail" autoMapping="true">
+            <id column="detail_id" property="id"/>
+ <!--           <id column="order_id" property="id"/>-->
+        </collection>
+    </resultMap>
+   <!--多对多查询 映射关系处理-->
+    <resultMap id="OrderUserDetailItemResultMap" type="com.yinhai.mybatis.pojo.Order" autoMapping="true">
+        <id column="id" property="id"/>
+        <association property="user" javaType="com.yinhai.mybatis.pojo.User" autoMapping="true">
+            <id column="user_id" property="id"/>
+        </association>
+
+        <collection property="detailList" javaType="List" ofType="com.yinhai.mybatis.pojo.OrderDetail" autoMapping="true">
+            <id column="detail_id" property="id"/>
+            <!--一个OrderDetail都有一个Item-->
+            <association property="item" javaType="com.yinhai.mybatis.pojo.Item" autoMapping="true">
+                <id column="item_id" property="id"/>
+            </association>
+        </collection>
+    </resultMap>
+
+
+
+    <select id="queryOrderUserByOrderNumber" resultType="com.yinhai.mybatis.pojo.OrderUser">
+         select * from tb_order o left join tb_user u on o.user_id=u.id where o.order_number = #{number}
+    </select>
+    <select id="queryOrderWithUserByOrderNumber" resultMap="OrderUserResultMap">
+         select * from tb_order o left join tb_user u on o.user_id=u.id where o.order_number = #{number}
+    </select>
+
+    <select id="queryOrderWithUserAndDetailByOrderNumber" resultMap="OrderUserDetailResultMap">
+        select * from tb_order o
+        left join tb_user u on o.user_id=u.id
+        left join tb_orderdetail od on o.id=od.order_id
+        where o.order_number = #{number}
+    </select>
+
+    <select id="queryOrderWithUserAndDetailItemByOrderNumber" resultMap="OrderUserDetailItemResultMap">
+           select * ,od.detail_id as detail_id from tb_order o
+           left join tb_user u on o.user_id=u.id
+           left join tb_orderdetail od on o.id=od.order_id
+           left join tb_item i on od.item_id=i.id
+           where o.order_number = #{number}
+   </select>
+
+
+
+    <!--以下为延迟加载测试-->
+    <resultMap id="LazyOrderUserResultMap" type="com.yinhai.mybatis.pojo.Order" autoMapping="true">
+        <id column="id" property="id"/>
+        <!--select:子查询的statement的id，column：子查询需要的条件-->
+
+        <association property="user" javaType="com.yinhai.mybatis.pojo.User" autoMapping="true"
+            select="queryUserById" column="user_id">
+        </association>
+    </resultMap>
+    <select id="queryOrderAndUserByOrderNumberLazy" resultMap="LazyOrderUserResultMap">
+        select * from tb_order where order_number=#{number}
+    </select>
+    <select id="queryUserById" resultType="com.yinhai.mybatis.pojo.User">
+        select * from tb_user where id = #{id}
+    </select>
+
+</mapper>
